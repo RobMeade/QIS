@@ -18,7 +18,7 @@ void AQISPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	QISCharacter = CastChecked<AQISCharacter>(GetPawn());
+	QISCharacter = Cast<AQISCharacter>(GetPawn());
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
@@ -30,7 +30,7 @@ void AQISPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent)) 
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) 
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AQISPlayerController::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AQISPlayerController::StopJumping);
