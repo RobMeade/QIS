@@ -1,6 +1,7 @@
 // Copyright Rob Meade. All Rights Reserved.
 
 #include "QISCharacter.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -57,8 +58,14 @@ void AQISCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInput
 	{
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AQISCharacter::Crouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AQISCharacter::StopCrouching);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AQISCharacter::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AQISCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AQISCharacter::Look);		
+		EnhancedInputComponent->BindAction(PickUpItemAction, ETriggerEvent::Triggered, this, &AQISCharacter::PickUpItem);		
+		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &AQISCharacter::DropItem);		
+		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Triggered, this, &AQISCharacter::UseItem);		
+		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this, &AQISCharacter::ToggleInventory);
 	}
 }
 
@@ -86,5 +93,59 @@ void AQISCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AQISCharacter::Crouch(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Start Crouching"));
+	}
+}
+
+void AQISCharacter::StopCrouching(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Stop Crouching"));
+	}
+}
+
+void AQISCharacter::PickUpItem(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Pick Up Item"));
+	}
+}
+
+void AQISCharacter::DropItem(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Drop Item"));
+	}
+}
+
+void AQISCharacter::UseItem(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Use Item"));
+	}
+}
+
+void AQISCharacter::ToggleInventory(const FInputActionValue& Value)
+{
+	// TODO:
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Toggle Inventory"));
 	}
 }
