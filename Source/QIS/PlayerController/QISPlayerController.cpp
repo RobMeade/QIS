@@ -2,11 +2,13 @@
 
 #include "QISPlayerController.h"
 
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/Controller.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 #include "QIS/Characters/Player/QISCharacter.h"
+#include "QIS/UI/InventoryWidget.h"
 
 
 AQISPlayerController::AQISPlayerController()
@@ -20,10 +22,9 @@ void AQISPlayerController::BeginPlay()
 
 	QISCharacter = Cast<AQISCharacter>(GetPawn());
 
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	}
+	AddEnhancedInputMappingContext();
+	CreateUIWidgets();
+	BindToUIEvents();
 }
 
 void AQISPlayerController::SetupInputComponent()
@@ -32,20 +33,20 @@ void AQISPlayerController::SetupInputComponent()
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent)) 
 	{
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AQISPlayerController::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AQISPlayerController::StopJumping);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AQISPlayerController::Crouch);
-		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AQISPlayerController::StopCrouching);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AQISPlayerController::Move);
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AQISPlayerController::Look);		
-		EnhancedInputComponent->BindAction(PickUpItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::PickUpItem);		
-		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::DropItem);		
-		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::UseItem);		
-		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Triggered, this, &AQISPlayerController::ToggleInventory);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AQISPlayerController::OnStopJumping);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnCrouch);
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AQISPlayerController::OnStopCrouching);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnMove);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnLook);		
+		EnhancedInputComponent->BindAction(PickUpItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnPickUpItem);		
+		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnDropItem);		
+		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnUseItem);		
+		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Started, this, &AQISPlayerController::OnToggleInventory);
 	}
 }
 
-void AQISPlayerController::Move(const FInputActionValue& Value)
+void AQISPlayerController::OnMove(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -53,7 +54,7 @@ void AQISPlayerController::Move(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::Look(const FInputActionValue& Value)
+void AQISPlayerController::OnLook(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -61,7 +62,7 @@ void AQISPlayerController::Look(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::Jump(const FInputActionValue& Value)
+void AQISPlayerController::OnJump(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -69,7 +70,7 @@ void AQISPlayerController::Jump(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::StopJumping(const FInputActionValue& Value)
+void AQISPlayerController::OnStopJumping(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -77,7 +78,7 @@ void AQISPlayerController::StopJumping(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::Crouch(const FInputActionValue& Value)
+void AQISPlayerController::OnCrouch(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -85,7 +86,7 @@ void AQISPlayerController::Crouch(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::StopCrouching(const FInputActionValue& Value)
+void AQISPlayerController::OnStopCrouching(const FInputActionValue& Value)
 {
 	if (QISCharacter)
 	{
@@ -93,7 +94,7 @@ void AQISPlayerController::StopCrouching(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::PickUpItem(const FInputActionValue& Value)
+void AQISPlayerController::OnPickUpItem(const FInputActionValue& Value)
 {
 	// TODO:
 	if (GEngine)
@@ -102,7 +103,7 @@ void AQISPlayerController::PickUpItem(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::DropItem(const FInputActionValue& Value)
+void AQISPlayerController::OnDropItem(const FInputActionValue& Value)
 {
 	// TODO:
 	if (GEngine)
@@ -111,7 +112,7 @@ void AQISPlayerController::DropItem(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::UseItem(const FInputActionValue& Value)
+void AQISPlayerController::OnUseItem(const FInputActionValue& Value)
 {
 	// TODO:
 	if (GEngine)
@@ -120,11 +121,106 @@ void AQISPlayerController::UseItem(const FInputActionValue& Value)
 	}
 }
 
-void AQISPlayerController::ToggleInventory(const FInputActionValue& Value)
+void AQISPlayerController::OnToggleInventory(const FInputActionValue& Value)
 {
-	// TODO:
-	if (GEngine)
+	ToggleInventory();
+}
+
+void AQISPlayerController::AddEnhancedInputMappingContext() const
+{
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Toggle Inventory"));
+		Subsystem->AddMappingContext(DefaultMappingContext, 0);
+	}
+}
+
+void AQISPlayerController::CreateUIWidgets()
+{
+	if (InventoryUserWidget)
+	{
+		InventoryWidget = CreateWidget<UInventoryWidget>(this, InventoryUserWidget);
+		if (InventoryWidget)
+		{
+			InventoryWidget->AddToViewport();
+			ToggleWidgetVisibility(InventoryWidget);
+		}
+	}
+}
+
+void AQISPlayerController::BindToUIEvents()
+{
+	if (InventoryWidget)
+	{
+		InventoryWidget->OnCloseButtonClicked.AddDynamic(this, &AQISPlayerController::OnInventoryCloseButtonClicked);
+	}
+}
+
+void AQISPlayerController::OnInventoryCloseButtonClicked()
+{
+	ToggleInventory();
+}
+
+void AQISPlayerController::ToggleInventory()
+{
+	ToggleWidgetVisibility(InventoryWidget);
+
+	if (InventoryWidget)
+	{
+		if (InventoryWidget->GetVisibility() == ESlateVisibility::Hidden)
+		{
+			SetInputModeForGame();
+		}
+		else
+		{
+			FlushPressedKeys();
+			SetInputModeForUI(InventoryWidget);
+		}
+	}
+}
+
+void AQISPlayerController::SetInputModeForUI(const UUserWidget* WidgetToFocus)
+{
+	if (WidgetToFocus)
+	{
+		FInputModeUIOnly InputModeUIOnly;
+		InputModeUIOnly.SetWidgetToFocus(WidgetToFocus->GetCachedWidget());		
+		SetInputMode(InputModeUIOnly);
+
+		bShowMouseCursor = true;		
+	}
+}
+
+void AQISPlayerController::SetInputModeForGame()
+{
+	const FInputModeGameOnly InputModeGameOnly;
+	SetInputMode(InputModeGameOnly);
+
+	bShowMouseCursor = false;
+}
+
+void AQISPlayerController::ToggleWidgetVisibility(UUserWidget* Widget)
+{
+	if (Widget)
+	{
+		switch (Widget->GetVisibility())
+		{
+			case ESlateVisibility::Visible:
+				Widget->SetVisibility(ESlateVisibility::Hidden);
+				break;
+			case ESlateVisibility::Collapsed:
+				Widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				break;
+			case ESlateVisibility::Hidden:
+				Widget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				break;
+			case ESlateVisibility::HitTestInvisible:
+				Widget->SetVisibility(ESlateVisibility::Hidden);
+				break;
+			case ESlateVisibility::SelfHitTestInvisible:
+				Widget->SetVisibility(ESlateVisibility::Hidden);
+				break;
+			default:
+				break;
+		}
 	}
 }

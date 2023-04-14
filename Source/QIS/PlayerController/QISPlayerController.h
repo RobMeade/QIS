@@ -12,8 +12,10 @@
 // Forward Declarations
 class UInputAction;
 class UInputMappingContext;
+class UUserWidget;
 
 class AQISCharacter;
+class UInventoryWidget;
 
 
 UCLASS()
@@ -32,22 +34,44 @@ protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
-	void Jump(const FInputActionValue& Value);
-	void StopJumping(const FInputActionValue& Value);
-	void Crouch(const FInputActionValue& Value);
-	void StopCrouching(const FInputActionValue& Value);
-	void PickUpItem(const FInputActionValue& Value);
-	void DropItem(const FInputActionValue& Value);
-	void UseItem(const FInputActionValue& Value);
-	void ToggleInventory(const FInputActionValue& Value);
+	/*
+	 * Player Input
+	 */
+	void OnMove(const FInputActionValue& Value);
+	void OnLook(const FInputActionValue& Value);
+	void OnJump(const FInputActionValue& Value);
+	void OnStopJumping(const FInputActionValue& Value);
+	void OnCrouch(const FInputActionValue& Value);
+	void OnStopCrouching(const FInputActionValue& Value);
+	void OnPickUpItem(const FInputActionValue& Value);
+	void OnDropItem(const FInputActionValue& Value);
+	void OnUseItem(const FInputActionValue& Value);
+	void OnToggleInventory(const FInputActionValue& Value);
 
 
 private:
 
+	void AddEnhancedInputMappingContext() const;
+	void CreateUIWidgets();
+	void BindToUIEvents();
+
 	/*
-	 * Input
+	 * UI - Inventory
+	 */
+	UFUNCTION()
+	void OnInventoryCloseButtonClicked();
+
+	void ToggleInventory();
+
+	/*
+	 * UI - Helpers
+	 */
+	void SetInputModeForUI(const UUserWidget* WidgetToFocus);
+	void SetInputModeForGame();
+	void ToggleWidgetVisibility(UUserWidget* Widget);
+
+	/*
+	 * Input Actions/Mappings
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputMappingContext* DefaultMappingContext;
@@ -75,6 +99,16 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleInventoryAction;
+
+	/*
+	 * UI Widgets
+	 */
+	UPROPERTY(EditAnywhere, Category = "User Interfaces")
+	TSubclassOf<UUserWidget> InventoryUserWidget = nullptr;
+
+	UPROPERTY()
+	UInventoryWidget* InventoryWidget = nullptr;
+
 
 	UPROPERTY()
 	AQISCharacter* QISCharacter = nullptr;
