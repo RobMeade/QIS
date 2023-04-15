@@ -4,16 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "QISCharacter.generated.h"
 
 
 // Forward Declarations
+struct FInputActionValue;
+
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
 
-struct FInputActionValue;
+class UInventoryComponent;
 
 
 UCLASS(config=Game)
@@ -46,4 +49,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	UInventoryComponent* Inventory;
 };

@@ -9,6 +9,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "InputActionValue.h"
 
+#include "QIS/Inventory/Components/InventoryComponent.h"
+
 
 AQISCharacter::AQISCharacter()
 {
@@ -36,6 +38,9 @@ AQISCharacter::AQISCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+
 }
 
 void AQISCharacter::Move(const FInputActionValue& Value)
