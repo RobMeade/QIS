@@ -8,6 +8,8 @@
 #include "Components/WidgetComponent.h"
 
 #include "QIS/Characters/Player/QISCharacter.h"
+#include "QIS/Inventory/Items/InventoryItem.h"
+#include "QIS/Inventory/Items/InventoryItemData.h"
 
 
 APickup::APickup()
@@ -77,7 +79,8 @@ void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
 		QISCharacter->SetOverlappingPickup(this);
 
 		//UInventoryItem* SomeItem = InventoryItem.GetDefaultObject();
-		//UE_LOG(LogTemp, Warning, TEXT("InventoryItem: %s (%s)"), *SomeItem->GetItemName(), *SomeItem->GetItemDescription())
+		//UInventoryItemData* SomeItemData = SomeItem->GetInventoryItemData();
+		//UE_LOG(LogTemp, Warning, TEXT("InventoryItem: %s (%s)"), *SomeItemData->GetItemName(), *SomeItemData->GetItemDescription())
 	}
 }
 
