@@ -10,6 +10,7 @@
 #include "InputActionValue.h"
 
 #include "QIS/Inventory/Components/InventoryComponent.h"
+#include "QIS/Pickups/Pickup.h"
 
 
 AQISCharacter::AQISCharacter()
@@ -67,5 +68,20 @@ void AQISCharacter::Look(const FInputActionValue& Value)
 	{
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AQISCharacter::SetOverlappingPickup(APickup* Pickup)
+{
+	if (OverlappingPickup)
+	{
+		OverlappingPickup->ShowPickupWidget(false);
+	}
+
+	OverlappingPickup = Pickup;
+
+	if (OverlappingPickup)
+	{
+		OverlappingPickup->ShowPickupWidget(true);
 	}
 }

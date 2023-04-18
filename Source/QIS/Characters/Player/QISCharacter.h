@@ -16,6 +16,7 @@ class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
 
+class APickup;
 class UInventoryComponent;
 
 
@@ -31,6 +32,8 @@ public:
 
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+
+	void SetOverlappingPickup(APickup* Pickup);
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }	
@@ -52,4 +55,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	UInventoryComponent* Inventory;
+
+	UPROPERTY()
+	APickup* OverlappingPickup = nullptr;
 };

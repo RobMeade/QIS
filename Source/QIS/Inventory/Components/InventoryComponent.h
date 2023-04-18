@@ -24,7 +24,7 @@ public:
 
 	//bool AddItemToSlot(int32 SlotID, AInventoryItem, int32 QuantityToAdd);
 	//bool AddToFirstEmptySlot(AInventoryItem, int32 QuantityToAdd);
-	//void RemoveFromSlot(int32 SlotID, int QuantityToRemove);
+	//void RemoveFromSlot(int32 SlotID, int QuantityToRemove);b
 
 
 protected:

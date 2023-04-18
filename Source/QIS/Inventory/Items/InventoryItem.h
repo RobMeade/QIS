@@ -14,15 +14,15 @@
 class UTexture2D;
 
 
-UCLASS()
-class QIS_API AInventoryItem : public AActor
+UCLASS(Blueprintable)
+class QIS_API UInventoryItem : public UObject
 {
 	GENERATED_BODY()
 
 
 public:
 
-	AInventoryItem();
+	UInventoryItem();
 
 	FORCEINLINE FGuid GetItemID() const { return ID; }
 	FORCEINLINE FString GetItemName() const { return Name; }

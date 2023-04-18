@@ -3,7 +3,7 @@
 #include "InventoryItem.h"
 
 
-AInventoryItem::AInventoryItem()
+UInventoryItem::UInventoryItem()
 {
 	// ...
 }
