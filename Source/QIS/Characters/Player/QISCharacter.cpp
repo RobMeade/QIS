@@ -71,6 +71,28 @@ void AQISCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+void AQISCharacter::PickUpItem()
+{
+	if (Inventory && OverlappingPickup)
+	{
+		// TODO: This would use the dictionary/TMap (static) having loaded in all InventoryItem/InventoryItemData assets
+		UInventoryItem* InventoryItem = OverlappingPickup->GetInventoryItem().GetDefaultObject();
+
+		if (Inventory->HasSpaceFor(InventoryItem))
+		{
+			// TODO: Hardcoded value of 1 at this time
+			Inventory->AddToFirstEmptySlot(InventoryItem, 1);
+
+			OverlappingPickup->Destroy();			
+		}
+		else
+		{
+			// TODO: Change the Pickup widget message accordingly
+			UE_LOG(LogTemp, Warning, TEXT("Your carrying too much!"));
+		}
+	}
+}
+
 void AQISCharacter::SetOverlappingPickup(APickup* Pickup)
 {
 	if (OverlappingPickup)

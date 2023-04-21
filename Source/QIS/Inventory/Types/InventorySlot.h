@@ -25,7 +25,10 @@ public:
 	int32 Capacity = 1;
 
 	UPROPERTY()
-	TArray<UInventoryItem*> Items;
+	UInventoryItem* Item = nullptr;
+
+	UPROPERTY()
+	int32 Quantity = 0;
 
 	UPROPERTY()
 	EInventoryCategory Category = EInventoryCategory::None;

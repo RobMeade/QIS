@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "QIS/Characters/Player/QISCharacter.h"
+#include "QIS/Pickups/Pickup.h"
 #include "QIS/UI/InventoryWidget.h"
 
 
@@ -39,9 +40,9 @@ void AQISPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &AQISPlayerController::OnStopCrouching);
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnMove);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnLook);		
-		EnhancedInputComponent->BindAction(PickUpItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnPickUpItem);		
-		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnDropItem);		
-		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Triggered, this, &AQISPlayerController::OnUseItem);		
+		EnhancedInputComponent->BindAction(PickUpItemAction, ETriggerEvent::Started, this, &AQISPlayerController::OnPickUpItem);		
+		EnhancedInputComponent->BindAction(DropItemAction, ETriggerEvent::Started, this, &AQISPlayerController::OnDropItem);		
+		EnhancedInputComponent->BindAction(UseItemAction, ETriggerEvent::Started, this, &AQISPlayerController::OnUseItem);		
 		EnhancedInputComponent->BindAction(ToggleInventoryAction, ETriggerEvent::Started, this, &AQISPlayerController::OnToggleInventory);
 	}
 }
@@ -96,10 +97,9 @@ void AQISPlayerController::OnStopCrouching(const FInputActionValue& Value)
 
 void AQISPlayerController::OnPickUpItem(const FInputActionValue& Value)
 {
-	// TODO:
-	if (GEngine)
+	if (QISCharacter)
 	{
-		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Pick Up Item"));
+		QISCharacter->PickUpItem();
 	}
 }
 

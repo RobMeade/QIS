@@ -30,6 +30,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void ShowPickupWidget(bool bShowWidget) const;
 
+	FORCEINLINE TSubclassOf<UInventoryItem> GetInventoryItem() const { return InventoryItem; }
+
 
 protected:
 
