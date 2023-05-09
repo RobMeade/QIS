@@ -20,6 +20,10 @@ class APickup;
 class UInventoryComponent;
 
 
+// Delegate Declarations
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FQISCharacter_OnInventoryUpdated, UInventoryComponent*, UpdatedInventory);
+
+
 UCLASS(config=Game)
 class AQISCharacter : public ACharacter
 {
@@ -30,11 +34,16 @@ public:
 
 	AQISCharacter();
 
+	virtual void BeginPlay() override;
+
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void PickUpItem();
 
 	void SetOverlappingPickup(APickup* Pickup);
+
+	// Delegates
+	FQISCharacter_OnInventoryUpdated OnInventoryUpdated;
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
@@ -45,6 +54,11 @@ protected:
 
 
 private:
+
+	void BindToComponentEvents();
+
+	UFUNCTION()
+	void OnInventoryComponentInventoryUpdated(UInventoryComponent* UpdatedInventory);
 
 	/*
 	 * Components

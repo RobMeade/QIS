@@ -10,6 +10,11 @@
 
 // Forward Declarations
 class UButton;
+class UUniformGridPanel;
+
+class UInventoryComponent;
+class UInventorySlotToolTipWidget;
+class UInventorySlotWidget;
 
 
 // Delegate Declarations
@@ -24,6 +29,8 @@ class QIS_API UInventoryWidget : public UUserWidget
 
 public:
 
+	void UpdateInventory(UInventoryComponent* UpdatedInventory);
+
 	/* Delegates */
 	FInventoryWidget_OnCloseButtonClicked OnCloseButtonClicked;
 
@@ -36,6 +43,7 @@ protected:
 private:
 
 	void BindToEvents();
+	void CreateInventorySlotToolTipWidget();
 
 	UFUNCTION()
 	void OnClickedCloseButton();
@@ -43,7 +51,19 @@ private:
 	/*
 	 * UI Widgets
 	 */
+	UPROPERTY(EditAnywhere, Category = "User Interfaces")
+	TSubclassOf<UUserWidget> InventorySlotUserWidget = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "User Interfaces")
+	TSubclassOf<UUserWidget> InventorySlotToolTipUserWidget = nullptr;
+
+	UPROPERTY()
+	UInventorySlotToolTipWidget* InventorySlotToolTipWidget = nullptr;
+
 	UPROPERTY(meta = (BindWidget))
 	UButton* BTN_Close = nullptr;
-	
+
+	UPROPERTY(meta = (BindWidget))
+	UUniformGridPanel* InventoryGridPanel = nullptr;
+
 };

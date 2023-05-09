@@ -4,14 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 
-#include "QIS/Inventory/Types/InventorySlot.h"
+#include "QIS/Inventory/Types/InventoryTransferRequest.h"
 
 #include "InventoryComponent.generated.h"
 
 
-// Delegate Declarations// Delegate Declarations
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryComponent_OnInventoryUpdated);
+// Forward Declarations
+class UInventoryItem;
+
+
+// Delegate Declarations
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryComponent_OnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryComponent_OnInventoryUpdated, UInventoryComponent*, Inventory);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -24,30 +30,39 @@ public:
 
 	UInventoryComponent();
 
+	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	//bool AddItemToSlot(int32 SlotID, UInventoryItem* InventoryItem, int32 QuantityToAdd);
-	bool AddToFirstEmptySlot(UInventoryItem* InventoryItem, const int32 QuantityToAdd);
-	bool HasSpaceFor(const UInventoryItem* InventoryItem);
-	//void RemoveFromSlot(int32 SlotID, int QuantityToRemove);b
+	void AddNewItem(FGameplayTag ItemTag, int32 StackSize);
+	void AddItemToInventory(UInventoryItem* ItemToAdd, bool BroadcastOnChange = true);
+	void RemoveItemFromInventory(UInventoryItem* ItemToRemove, bool BroadcastOnChange = true);
+	bool CanAddItemToInventory(UInventoryItem* QueryItem, bool BroadcastOnChange = true);
+	bool AttemptItemTransfer(FInventoryTransferRequest TransferRequestData);
+
+	UInventoryItem* GetInventoryItemWithSmallestStackByTag(FGameplayTag ItemTag) const;
+	int32 GetLowestAvailableSlotIndex() const;
+
+
+	// Testing
+	TArray<UInventoryItem*> GetInventoryItemsForDisplay() const;
 
 	// Delegates
 	FInventoryComponent_OnInventoryUpdated OnInventoryUpdated;
 
+	FORCEINLINE int32 GetInventorySize() const { return InventorySize; }
+	FORCEINLINE TArray<UInventoryItem*> GetInventoryItems() const { return InventoryItems; }
+
 
 protected:
 
-	virtual void BeginPlay() override;
-
-
+	
 private:
 
-	int32 FindSlot(const UInventoryItem* InventoryItem);
-	int32 FindStack(const UInventoryItem* InventoryItem);
-	int32 FindEmptySlot();
+	TArray<UInventoryItem*> GetInventoryItemsByTag(const FGameplayTag& ItemTag) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
-	int32 InventorySize = 5;
+	int32 InventorySize = 1;
 
-	TArray<FInventorySlot> Slots;
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TArray<UInventoryItem*> InventoryItems;
 };

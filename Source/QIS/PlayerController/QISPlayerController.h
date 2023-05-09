@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UUserWidget;
 
 class AQISCharacter;
+class UInventoryComponent;
 class UInventoryWidget;
 
 
@@ -54,6 +55,10 @@ private:
 	void AddEnhancedInputMappingContext() const;
 	void CreateUIWidgets();
 	void BindToUIEvents();
+	void BindToCharacterEvents();
+
+	UFUNCTION()
+	void OnQISCharacterInventoryUpdated(UInventoryComponent* UpdatedInventory);
 
 	/*
 	 * UI - Inventory

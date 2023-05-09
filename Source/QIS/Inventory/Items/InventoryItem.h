@@ -3,13 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Misc/Guid.h"
+#include "GameplayTagContainer.h"
+
+#include "QIS/Inventory/Types/ItemFloatStats.h"
 
 #include "InventoryItem.generated.h"
 
 
 // Forward Declarations
-class UInventoryItemData;
+class UInventoryItemStaticData;
 
 
 UCLASS(Blueprintable)
@@ -20,10 +22,16 @@ class QIS_API UInventoryItem : public UObject
 
 public:
 
-	UInventoryItem();
+	void SetStatValue(const FItemFloatStatEntry ItemFloatStatEntry);
 
-	FORCEINLINE FName GetItemID() const { return ID; }
-	FORCEINLINE UInventoryItemData* GetInventoryItemData() const { return InventoryItemData; }
+	// TODO: Maybe drop all the getters?  The structs are returning copies (might not be ideal in all situations), and if I make the a reference then I may as well just expose the member in the first place
+	FORCEINLINE FGameplayTag GetItemTag() const { return ItemTag; }
+	FORCEINLINE UInventoryItemStaticData* GetItemStaticData() const { return ItemStaticData; }
+	FORCEINLINE FItemFloatStats& GetItemFloatStats() { return ItemFloatStats; }
+	FORCEINLINE void SetItemTag(const FGameplayTag InItemTag) { ItemTag = InItemTag; }
+	FORCEINLINE void SetItemStaticData(UInventoryItemStaticData* InItemStaticData) { ItemStaticData = InItemStaticData; }
+
+	static bool CompareItemTag(const UInventoryItem* InventoryItem, const FGameplayTag& ItemTag);
 
 
 protected:
@@ -32,8 +40,12 @@ protected:
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Item")
-	FName ID;
+	FGameplayTag ItemTag;
 
 	UPROPERTY(EditAnywhere, Category = "Item")
-	UInventoryItemData* InventoryItemData = nullptr;
+	UInventoryItemStaticData* ItemStaticData = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Item")
+	FItemFloatStats ItemFloatStats;
+
 };

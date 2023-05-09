@@ -2,6 +2,8 @@
 
 #include "QISCharacter.h"
 
+#include <string>
+
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,11 +12,15 @@
 #include "InputActionValue.h"
 
 #include "QIS/Inventory/Components/InventoryComponent.h"
+#include "QIS/Inventory/Items/InventoryItem.h"
+#include "QIS/Inventory/Items/InventoryItemStaticData.h"
 #include "QIS/Pickups/Pickup.h"
 
 
 AQISCharacter::AQISCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	bUseControllerRotationPitch = false;
@@ -41,7 +47,17 @@ AQISCharacter::AQISCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	if (Inventory)
+	{
+		AddOwnedComponent(Inventory);
+	}
+}
 
+void AQISCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	BindToComponentEvents();
 }
 
 void AQISCharacter::Move(const FInputActionValue& Value)
@@ -73,22 +89,82 @@ void AQISCharacter::Look(const FInputActionValue& Value)
 
 void AQISCharacter::PickUpItem()
 {
-	if (Inventory && OverlappingPickup)
+	if (Inventory && OverlappingPickup && OverlappingPickup->GetInventory())
 	{
-		// TODO: This would use the dictionary/TMap (static) having loaded in all InventoryItem/InventoryItemData assets
-		UInventoryItem* InventoryItem = OverlappingPickup->GetInventoryItem().GetDefaultObject();
+		// TODO: If pickups are always singular, and then I create a PickupContainer class to hand things like Chests etc
+		// I can then remove the bcanDestroyPickup, as it will always be destroyed if the item can be picked up, e.g. successful attempt
+		bool bCanDestroyPickup = true;
 
-		if (Inventory->HasSpaceFor(InventoryItem))
+		UInventoryComponent* PickupInventory = OverlappingPickup->GetInventory();
+
+		UE_LOG(LogTemp, Warning, TEXT("------ Before Transfer ------"));
+		UE_LOG(LogTemp, Warning, TEXT("Items in Pickup Inventory: %s"), *FString::FromInt(PickupInventory->GetInventoryItems().Num()));
+
+		for (UInventoryItem* InventoryItem : PickupInventory->GetInventoryItems())
 		{
-			// TODO: Hardcoded value of 1 at this time
-			Inventory->AddToFirstEmptySlot(InventoryItem, 1);
-
-			OverlappingPickup->Destroy();			
+			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %s)"), *InventoryItem->GetItemStaticData()->GetItemName(), *FString::FromInt(InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize"))));
 		}
-		else
+
+		UE_LOG(LogTemp, Warning, TEXT(" "));
+		UE_LOG(LogTemp, Warning, TEXT("Items in Player Inventory: %s"), *FString::FromInt(Inventory->GetInventoryItems().Num()));
+
+		for (UInventoryItem* InventoryItem : Inventory->GetInventoryItems())
 		{
-			// TODO: Change the Pickup widget message accordingly
-			UE_LOG(LogTemp, Warning, TEXT("Your carrying too much!"));
+			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %s)"), *InventoryItem->GetItemStaticData()->GetItemName(), *FString::FromInt(InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize"))));
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT(" "));
+
+		// TODO: This would be better being within the component, not our here.  But I need to check for a "ToInventoryItem".
+		if (PickupInventory->GetInventoryItems().Num() > 0)
+		{
+			UInventoryItem* InventoryItem = PickupInventory->GetInventoryItems()[0];
+
+			UInventoryItem* ToInventoryItem = Inventory->GetInventoryItemWithSmallestStackByTag(InventoryItem->GetItemTag());
+			if (ToInventoryItem)
+			{
+				const int32 QuantityToMove = InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize"));
+				FInventoryTransferRequest InventoryTransferRequest = FInventoryTransferRequest(PickupInventory, Inventory, InventoryItem, ToInventoryItem, QuantityToMove); 
+				bCanDestroyPickup = Inventory->AttemptItemTransfer(InventoryTransferRequest);
+			}
+			else
+			{
+				if (Inventory->CanAddItemToInventory(InventoryItem))
+				{
+					FInventoryTransferRequest InventoryTransferRequest = FInventoryTransferRequest(PickupInventory, Inventory, InventoryItem);
+					bCanDestroyPickup = Inventory->AttemptItemTransfer(InventoryTransferRequest);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("** MERP - Inventory is full! **"));
+					bCanDestroyPickup = false;
+				}
+			}
+		}
+
+
+		UE_LOG(LogTemp, Warning, TEXT("------ After  Transfer ------"));
+		//UE_LOG(LogTemp, Warning, TEXT("Items in Pickup Inventory: %s"), *FString::FromInt(PickupInventory->GetInventoryItems().Num()));
+
+		for (UInventoryItem* InventoryItem : PickupInventory->GetInventoryItems())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %f)"), *InventoryItem->GetItemStaticData()->GetItemName(), InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize")));
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT(" "));
+		UE_LOG(LogTemp, Warning, TEXT("Items in Player Inventory: %s"), *FString::FromInt(Inventory->GetInventoryItems().Num()));
+
+		for (UInventoryItem* InventoryItemOther : Inventory->GetInventoryItems())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %f) (Slot: %f)"), *InventoryItemOther->GetItemStaticData()->GetItemName(), InventoryItemOther->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize")), InventoryItemOther->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.SlotIndex")));
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("-----------------------------"));
+		UE_LOG(LogTemp, Warning, TEXT(" "));
+
+		if (bCanDestroyPickup)
+		{
+			OverlappingPickup->Destroy();			
 		}
 	}
 }
@@ -106,4 +182,17 @@ void AQISCharacter::SetOverlappingPickup(APickup* Pickup)
 	{
 		OverlappingPickup->ShowPickupWidget(true);
 	}
+}
+
+void AQISCharacter::BindToComponentEvents()
+{
+	if (Inventory)
+	{
+		Inventory->OnInventoryUpdated.AddDynamic(this, &AQISCharacter::OnInventoryComponentInventoryUpdated);
+	}
+}
+
+void AQISCharacter::OnInventoryComponentInventoryUpdated(UInventoryComponent* UpdatedInventory)
+{
+	OnInventoryUpdated.Broadcast(UpdatedInventory);
 }

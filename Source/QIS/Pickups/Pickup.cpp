@@ -9,7 +9,6 @@
 
 #include "QIS/Characters/Player/QISCharacter.h"
 #include "QIS/Inventory/Items/InventoryItem.h"
-#include "QIS/Inventory/Items/InventoryItemData.h"
 
 
 APickup::APickup()
@@ -40,6 +39,12 @@ APickup::APickup()
 	{
 		PickupWidget->SetupAttachment(RootComponent);		
 	}
+
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	if (Inventory)
+	{
+		AddOwnedComponent(Inventory);
+	}
 }
 
 void APickup::BeginPlay()
@@ -55,6 +60,14 @@ void APickup::BeginPlay()
 	{
 		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnSphereOverlap);
 		OverlapSphere->OnComponentEndOverlap.AddDynamic(this, &APickup::OnSphereEndOverlap);
+	}
+
+	if (Inventory)
+	{
+		for (FPickupStaticDataEntry PickupStaticDataEntry : PickupStaticData.StaticData)
+		{
+			Inventory->AddNewItem(PickupStaticDataEntry.ItemTag, PickupStaticDataEntry.StaticPickupFloatStats.GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize")));
+		}
 	}
 }
 
@@ -72,22 +85,16 @@ void APickup::ShowPickupWidget(const bool bShowWidget) const
 }
 
 void APickup::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	AQISCharacter* QISCharacter = Cast<AQISCharacter>(OtherActor);
-	if (QISCharacter)
+{	
+	if (AQISCharacter* QISCharacter = Cast<AQISCharacter>(OtherActor))
 	{
 		QISCharacter->SetOverlappingPickup(this);
-
-		//UInventoryItem* SomeItem = InventoryItem.GetDefaultObject();
-		//UInventoryItemData* SomeItemData = SomeItem->GetInventoryItemData();
-		//UE_LOG(LogTemp, Warning, TEXT("InventoryItem: %s (%s)"), *SomeItemData->GetItemName(), *SomeItemData->GetItemDescription())
 	}
 }
 
 void APickup::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	AQISCharacter* QISCharacter = Cast<AQISCharacter>(OtherActor);
-	if (QISCharacter)
+	if (AQISCharacter* QISCharacter = Cast<AQISCharacter>(OtherActor))
 	{
 		QISCharacter->SetOverlappingPickup(nullptr);
 	}

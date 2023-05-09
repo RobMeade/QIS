@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "QIS/Characters/Player/QISCharacter.h"
+#include "QIS/Inventory/Components/InventoryComponent.h"
 #include "QIS/Pickups/Pickup.h"
 #include "QIS/UI/InventoryWidget.h"
 
@@ -26,6 +27,7 @@ void AQISPlayerController::BeginPlay()
 	AddEnhancedInputMappingContext();
 	CreateUIWidgets();
 	BindToUIEvents();
+	BindToCharacterEvents();
 }
 
 void AQISPlayerController::SetupInputComponent()
@@ -152,6 +154,22 @@ void AQISPlayerController::BindToUIEvents()
 	if (InventoryWidget)
 	{
 		InventoryWidget->OnCloseButtonClicked.AddDynamic(this, &AQISPlayerController::OnInventoryCloseButtonClicked);
+	}
+}
+
+void AQISPlayerController::BindToCharacterEvents()
+{
+	if (QISCharacter)
+	{
+		QISCharacter->OnInventoryUpdated.AddDynamic(this, &AQISPlayerController::OnQISCharacterInventoryUpdated);
+	}
+}
+
+void AQISPlayerController::OnQISCharacterInventoryUpdated(UInventoryComponent* UpdatedInventory)
+{
+	if (InventoryWidget)
+	{
+		InventoryWidget->UpdateInventory(UpdatedInventory);
 	}
 }
 

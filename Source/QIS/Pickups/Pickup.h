@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 
-#include "QIS/Inventory/Items/InventoryItem.h"
+#include "QIS/Inventory/Components/InventoryComponent.h"
+#include "QIS/Inventory/Types/PickupStaticData.h"
 
 #include "Pickup.generated.h"
 
@@ -30,7 +32,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void ShowPickupWidget(bool bShowWidget) const;
 
-	FORCEINLINE TSubclassOf<UInventoryItem> GetInventoryItem() const { return InventoryItem; }
+	FORCEINLINE UInventoryComponent* GetInventory() const { return Inventory; }
 
 
 protected:
@@ -44,17 +46,21 @@ protected:
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 
+
 private:	
 
 	UPROPERTY(EditAnywhere, Category = "Pickup|Components")
 	USphereComponent* OverlapSphere = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Pickup|Components")
+	UPROPERTY(VisibleAnywhere, Category = "Pickup|Components")
 	UStaticMeshComponent* StaticMesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere, Category = "Pickup|Components")
 	UWidgetComponent* PickupWidget;	
 
+	UPROPERTY(VisibleAnywhere, Category = "Pickup|Components", meta = (AllowPrivateAccess = "true"))
+	UInventoryComponent* Inventory;
+
 	UPROPERTY(EditAnywhere, Category = "Pickup")
-	TSubclassOf<UInventoryItem> InventoryItem = nullptr;
+	FPickupStaticData PickupStaticData;
 };
