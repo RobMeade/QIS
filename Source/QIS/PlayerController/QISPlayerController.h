@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "GameFramework/PlayerController.h"
+
+#include "QIS/Inventory/Types/InventoryMoveRequest.h"
 
 #include "QISPlayerController.generated.h"
 
@@ -65,6 +67,9 @@ private:
 	 */
 	UFUNCTION()
 	void OnInventoryCloseButtonClicked();
+
+	UFUNCTION()
+	void OnInventoryItemMoved(FInventoryMoveRequest InventoryMoveRequest);
 
 	void ToggleInventory();
 

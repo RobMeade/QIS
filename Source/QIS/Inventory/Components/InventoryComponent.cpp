@@ -160,6 +160,42 @@ bool UInventoryComponent::AttemptItemTransfer(FInventoryTransferRequest Transfer
 	return false;
 }
 
+bool UInventoryComponent::AttemptMoveItem(FInventoryMoveRequest MoveRequestData)
+{
+	if (MoveRequestData.IsValidRequest())
+	{
+		if (GetInventoryItemsForDisplay()[MoveRequestData.ToSlotIndex])
+		{
+			// swap items
+			UInventoryItem* InventoryItemA = GetInventoryItemsForDisplay()[MoveRequestData.FromSlotIndex];
+			UInventoryItem* InventoryItemB = GetInventoryItemsForDisplay()[MoveRequestData.ToSlotIndex];
+
+			if (InventoryItemA && InventoryItemB)
+			{
+				InventoryItemA->SetStatValue(FItemFloatStatEntry(FGameplayTag::RequestGameplayTag(("Inventory.ItemFloatStat.SlotIndex")), MoveRequestData.ToSlotIndex));
+				InventoryItemB->SetStatValue(FItemFloatStatEntry(FGameplayTag::RequestGameplayTag(("Inventory.ItemFloatStat.SlotIndex")), MoveRequestData.FromSlotIndex));
+			}
+		}
+		else
+		{
+			// update item
+			UInventoryItem* InventoryItem = GetInventoryItemsForDisplay()[MoveRequestData.FromSlotIndex];
+			if (InventoryItem)
+			{
+				InventoryItem->SetStatValue(FItemFloatStatEntry(FGameplayTag::RequestGameplayTag(("Inventory.ItemFloatStat.SlotIndex")), MoveRequestData.ToSlotIndex));
+			}
+		}
+
+		OnInventoryUpdated.Broadcast(this);
+
+		return true;
+	}
+
+	// TODO: Need to handle this, if the request isn't valid then we need to NOT update the UI, and leave the item where it was
+	UE_LOG(LogTemp, Error, TEXT("Invalid InventoryMoveRequest (FromSlotIndex: %d, ToSlotIndex: %d)"), MoveRequestData.FromSlotIndex, MoveRequestData.ToSlotIndex);
+	return false;
+}
+
 UInventoryItem* UInventoryComponent::GetInventoryItemWithSmallestStackByTag(FGameplayTag ItemTag) const
 {
 	UInventoryItem* InventoryItemWithSmallestStack = nullptr;

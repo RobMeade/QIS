@@ -47,6 +47,7 @@ public:
 
 	FORCEINLINE USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE UInventoryComponent* GetInventory() const { return Inventory; }
 	FORCEINLINE APickup* GetOverlappingPickup() const { return OverlappingPickup; }
 
 

@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
+#include "QIS/Inventory/Types/InventoryMoveRequest.h"
+
 #include "InventoryWidget.generated.h"
 
 
 // Forward Declarations
 class UButton;
+class UImage;
 class UUniformGridPanel;
 
 class UInventoryComponent;
@@ -19,6 +22,7 @@ class UInventorySlotWidget;
 
 // Delegate Declarations
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryWidget_OnCloseButtonClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryWidget_OnInventoryItemMoved, FInventoryMoveRequest, InventoryMoveRequest);
 
 
 UCLASS()
@@ -33,6 +37,7 @@ public:
 
 	/* Delegates */
 	FInventoryWidget_OnCloseButtonClicked OnCloseButtonClicked;
+	FInventoryWidget_OnInventoryItemMoved OnInventoryItemMoved;
 
 
 protected:
@@ -48,6 +53,9 @@ private:
 	UFUNCTION()
 	void OnClickedCloseButton();
 
+	UFUNCTION()
+	void OnInventorySlotMoved(FInventoryMoveRequest InventoryMoveRequest);
+
 	/*
 	 * UI Widgets
 	 */
@@ -55,10 +63,16 @@ private:
 	TSubclassOf<UUserWidget> InventorySlotUserWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "User Interfaces")
+	TSubclassOf<UUserWidget> InventorySlotItemUserWidget = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "User Interfaces")
 	TSubclassOf<UUserWidget> InventorySlotToolTipUserWidget = nullptr;
 
 	UPROPERTY()
 	UInventorySlotToolTipWidget* InventorySlotToolTipWidget = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* IMG_Background = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* BTN_Close = nullptr;

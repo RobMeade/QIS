@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
 
+#include "QIS/Inventory/Types/InventoryMoveRequest.h"
 #include "QIS/Inventory/Types/InventoryTransferRequest.h"
 
 #include "InventoryComponent.generated.h"
@@ -38,6 +39,7 @@ public:
 	void RemoveItemFromInventory(UInventoryItem* ItemToRemove, bool BroadcastOnChange = true);
 	bool CanAddItemToInventory(UInventoryItem* QueryItem, bool BroadcastOnChange = true);
 	bool AttemptItemTransfer(FInventoryTransferRequest TransferRequestData);
+	bool AttemptMoveItem(FInventoryMoveRequest MoveRequestData);
 
 	UInventoryItem* GetInventoryItemWithSmallestStackByTag(FGameplayTag ItemTag) const;
 	int32 GetLowestAvailableSlotIndex() const;

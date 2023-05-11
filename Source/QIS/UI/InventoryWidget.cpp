@@ -47,6 +47,8 @@ void UInventoryWidget::UpdateInventory(UInventoryComponent* UpdatedInventory)
 				}
 
 				InventoryGridPanel->AddChildToUniformGrid(InventorySlot, Row, Column);
+
+				InventorySlot->OnMoved.AddDynamic(this, &UInventoryWidget::OnInventorySlotMoved);
 			}
 		}
 	}
@@ -77,4 +79,9 @@ void UInventoryWidget::CreateInventorySlotToolTipWidget()
 void UInventoryWidget::OnClickedCloseButton()
 {
 	OnCloseButtonClicked.Broadcast();
+}
+
+void UInventoryWidget::OnInventorySlotMoved(FInventoryMoveRequest InventoryMoveRequest)
+{
+	OnInventoryItemMoved.Broadcast(InventoryMoveRequest);
 }

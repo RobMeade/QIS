@@ -145,6 +145,8 @@ void AQISPlayerController::CreateUIWidgets()
 		{
 			InventoryWidget->AddToViewport();
 			ToggleWidgetVisibility(InventoryWidget);
+
+			InventoryWidget->OnInventoryItemMoved.AddDynamic(this, &AQISPlayerController::OnInventoryItemMoved);
 		}
 	}
 }
@@ -176,6 +178,16 @@ void AQISPlayerController::OnQISCharacterInventoryUpdated(UInventoryComponent* U
 void AQISPlayerController::OnInventoryCloseButtonClicked()
 {
 	ToggleInventory();
+}
+
+
+void AQISPlayerController::OnInventoryItemMoved(FInventoryMoveRequest InventoryMoveRequest)
+{
+	if (QISCharacter && QISCharacter->GetInventory())
+	{
+		// TODO: Not sure if this is the best place for this, should this live on the QISCharacter instead?
+		QISCharacter->GetInventory()->AttemptMoveItem(InventoryMoveRequest);
+	}
 }
 
 void AQISPlayerController::ToggleInventory()
