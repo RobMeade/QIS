@@ -39,6 +39,7 @@ public:
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void PickUpItem();
+	void DropInventoryItem(int32 SlotIndex);
 
 	void SetOverlappingPickup(APickup* Pickup);
 

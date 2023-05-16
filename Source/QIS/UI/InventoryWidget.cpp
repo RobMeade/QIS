@@ -2,9 +2,14 @@
 
 #include "InventoryWidget.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/UniformGridPanel.h"
+#include "Layout/Margin.h"
 
+#include "InventoryBackdropWidget.h"
 #include "InventorySlotToolTipWidget.h"
 #include "InventorySlotWidget.h"
 #include "QIS/Inventory/Components/InventoryComponent.h"
@@ -57,9 +62,35 @@ void UInventoryWidget::UpdateInventory(UInventoryComponent* UpdatedInventory)
 void UInventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	BindToEvents();
+	
+	CreateInventoryBackdrop();
 	CreateInventorySlotToolTipWidget();
+	BindToEvents();
+}
+
+void UInventoryWidget::CreateInventoryBackdrop()
+{
+	// TODO: Need to add Check or something similar here to make it crash if the widget is missing
+	if (InventoryBackdropUserWidget)
+	{
+		InventoryBackdrop = CreateWidget<UInventoryBackdropWidget>(this, InventoryBackdropUserWidget);
+		if (InventoryBackdrop)
+		{
+			UCanvasPanelSlot* CanvasPanelSlot = InventoryWidgetPanel->AddChildToCanvas(InventoryBackdrop);
+			if (CanvasPanelSlot)
+			{
+				CanvasPanelSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
+				CanvasPanelSlot->SetOffsets(FMargin(0.f));
+				CanvasPanelSlot->SetZOrder(0);
+			}
+		}
+	}
+}
+
+void UInventoryWidget::CreateInventorySlotToolTipWidget()
+{
+	// TODO: Use this to create just one instance of the tooltip
+	//InventorySlotToolTipWidget = CreateWidget<UInventorySlotToolTipWidget>(this, InventorySlotToolTipUserWidget);
 }
 
 void UInventoryWidget::BindToEvents()
@@ -68,12 +99,11 @@ void UInventoryWidget::BindToEvents()
 	{
 		BTN_Close->OnClicked.AddDynamic(this, &UInventoryWidget::OnClickedCloseButton);
 	}
-}
 
-void UInventoryWidget::CreateInventorySlotToolTipWidget()
-{
-	// TODO: Use this to create just one instance of the tooltip
-	//InventorySlotToolTipWidget = CreateWidget<UInventorySlotToolTipWidget>(this, InventorySlotToolTipUserWidget);
+	if (InventoryBackdrop)
+	{
+		InventoryBackdrop->OnInventorySlotItemDropped.AddDynamic(this, &UInventoryWidget::OnInventorySlotItemDropped);
+	}
 }
 
 void UInventoryWidget::OnClickedCloseButton()
@@ -84,4 +114,9 @@ void UInventoryWidget::OnClickedCloseButton()
 void UInventoryWidget::OnInventorySlotMoved(FInventoryMoveRequest InventoryMoveRequest)
 {
 	OnInventoryItemMoved.Broadcast(InventoryMoveRequest);
+}
+
+void UInventoryWidget::OnInventorySlotItemDropped(int32 SlotIndex)
+{
+	OnInventoryItemDropped.Broadcast(SlotIndex);
 }

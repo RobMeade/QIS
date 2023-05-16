@@ -71,6 +71,9 @@ private:
 	UFUNCTION()
 	void OnInventoryItemMoved(FInventoryMoveRequest InventoryMoveRequest);
 
+	UFUNCTION()
+	void OnInventoryItemDropped(int32 SlotIndex);
+
 	void ToggleInventory();
 
 	/*

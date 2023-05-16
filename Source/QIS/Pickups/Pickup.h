@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 
 #include "QIS/Inventory/Components/InventoryComponent.h"
@@ -31,6 +30,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	void ShowPickupWidget(bool bShowWidget) const;
+	void SetupPickup(UInventoryItem* InventoryItem);
+	void TossPickup(const FVector Direction);
 
 	FORCEINLINE UInventoryComponent* GetInventory() const { return Inventory; }
 
@@ -44,7 +45,6 @@ protected:
 
 	UFUNCTION()
 	virtual void OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
 
 
 private:	

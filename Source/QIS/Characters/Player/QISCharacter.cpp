@@ -97,27 +97,10 @@ void AQISCharacter::PickUpItem()
 
 		UInventoryComponent* PickupInventory = OverlappingPickup->GetInventory();
 
-		UE_LOG(LogTemp, Warning, TEXT("------ Before Transfer ------"));
-		UE_LOG(LogTemp, Warning, TEXT("Items in Pickup Inventory: %s"), *FString::FromInt(PickupInventory->GetInventoryItems().Num()));
-
-		for (UInventoryItem* InventoryItem : PickupInventory->GetInventoryItems())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %s)"), *InventoryItem->GetItemStaticData()->GetItemName(), *FString::FromInt(InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize"))));
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT(" "));
-		UE_LOG(LogTemp, Warning, TEXT("Items in Player Inventory: %s"), *FString::FromInt(Inventory->GetInventoryItems().Num()));
-
-		for (UInventoryItem* InventoryItem : Inventory->GetInventoryItems())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %s)"), *InventoryItem->GetItemStaticData()->GetItemName(), *FString::FromInt(InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize"))));
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT(" "));
-
 		// TODO: This would be better being within the component, not our here.  But I need to check for a "ToInventoryItem".
 		if (PickupInventory->GetInventoryItems().Num() > 0)
 		{
+			// TODO: Note 0 index - pickups are going to only be single items etc
 			UInventoryItem* InventoryItem = PickupInventory->GetInventoryItems()[0];
 
 			UInventoryItem* ToInventoryItem = Inventory->GetInventoryItemWithSmallestStackByTag(InventoryItem->GetItemTag());
@@ -136,36 +119,60 @@ void AQISCharacter::PickUpItem()
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("** MERP - Inventory is full! **"));
+					// inventory is full
 					bCanDestroyPickup = false;
 				}
 			}
 		}
 
-
-		UE_LOG(LogTemp, Warning, TEXT("------ After  Transfer ------"));
-		//UE_LOG(LogTemp, Warning, TEXT("Items in Pickup Inventory: %s"), *FString::FromInt(PickupInventory->GetInventoryItems().Num()));
-
-		for (UInventoryItem* InventoryItem : PickupInventory->GetInventoryItems())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %f)"), *InventoryItem->GetItemStaticData()->GetItemName(), InventoryItem->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize")));
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT(" "));
-		UE_LOG(LogTemp, Warning, TEXT("Items in Player Inventory: %s"), *FString::FromInt(Inventory->GetInventoryItems().Num()));
-
-		for (UInventoryItem* InventoryItemOther : Inventory->GetInventoryItems())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Item: %s (Stack: %f) (Slot: %f)"), *InventoryItemOther->GetItemStaticData()->GetItemName(), InventoryItemOther->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.StackSize")), InventoryItemOther->GetItemFloatStats().GetFloatStatByTag(FGameplayTag::RequestGameplayTag("Inventory.ItemFloatStat.SlotIndex")));
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("-----------------------------"));
-		UE_LOG(LogTemp, Warning, TEXT(" "));
-
 		if (bCanDestroyPickup)
 		{
 			OverlappingPickup->Destroy();			
 		}
+	}
+}
+
+void AQISCharacter::DropInventoryItem(int32 SlotIndex)
+{
+	// TODO: I think it might be better to be storing a pointer on the UI widget slot to the inventory item
+	// it would save having to keep finding items by an inventory slot, and allow direct access
+
+	// TODO: This all needs refactoring, need to decide where it would be better to place some of this.
+	// not sure makes sense for the character to be creating pickups, but then, its the character that's
+	// dropping the items from their inventory...
+	// Revisiting this, I think it would make more sense for the InventoryItem to create the Pickup instance, it already has
+	// all of its data and they are related.
+
+	if (Inventory)
+	{
+		UInventoryItem* InventoryItem = Inventory->GetInventoryItemsForDisplay()[SlotIndex];
+
+		FTransform PickupTransform;
+		FVector Location = GetActorLocation();
+		Location += FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.5f);
+		PickupTransform.SetLocation(Location);
+		PickupTransform.SetRotation(FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f).Quaternion());
+
+		FActorSpawnParameters SpawnParameters;
+	    SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	    SpawnParameters.bDeferConstruction = true;
+	    SpawnParameters.Owner = this;
+	    APickup* PickupItem = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), PickupTransform, SpawnParameters);
+
+		if (!PickupItem)
+		{
+			return;
+		}
+
+		// TODO: Need to remember that the item may have other data to pass than just the quantity etc
+		// TODO: Hard coded "1" for testing purposes
+	    PickupItem->SetupPickup(InventoryItem);
+	    PickupItem->FinishSpawning(PickupTransform);
+
+		PickupItem->TossPickup(GetActorForwardVector());
+
+		// Remove Item (quantity) from Inventory (checks needed for quantity, reduce stack, or remove item etc)
+		Inventory->RemoveItemFromInventory(InventoryItem);
 	}
 }
 

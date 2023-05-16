@@ -29,9 +29,13 @@ public:
 
 	UInventoryItem* CreateItemInstance(UInventoryComponent* ForComponent);
 
+	// TODO: Do I want all these getters?
+
 	FORCEINLINE FGameplayTag GetItemTag() const { return ItemTag; }
 	FORCEINLINE FString GetItemName() const { return Name; }
 	FORCEINLINE FString GetItemDescription() const { return Description; }
+	FORCEINLINE TSoftObjectPtr<UStaticMesh> GetPickupStaticMesh() { return PickupStaticMesh; }
+	FORCEINLINE TSubclassOf<UUserWidget> GetPickupWidgetClass() const { return PickupWidgetClass; }
 	FORCEINLINE TSoftObjectPtr<UTexture2D> GetItemInventoryTexture() { return InventoryTexture; }
 
 	FORCEINLINE FItemFloatStats GetStaticItemFloatStats() const { return StaticItemFloatStats; }
@@ -62,6 +66,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Inventory Item Static Data|Pickup")
 	TSoftObjectPtr<UStaticMesh> PickupStaticMesh;
+
+	UPROPERTY(EditAnywhere, Category = "Inventory Item Static Data|Pickup")
+	TSubclassOf<UUserWidget> PickupWidgetClass;
 
 	UPROPERTY(EditAnywhere, Category = "Inventory Item Static Data|Inventory")
 	TSoftObjectPtr<UTexture2D> InventoryTexture = nullptr;

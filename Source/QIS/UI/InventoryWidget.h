@@ -12,9 +12,12 @@
 
 // Forward Declarations
 class UButton;
+class UCanvasPanel;
+class UDragDropOperation;
 class UImage;
 class UUniformGridPanel;
 
+class UInventoryBackdropWidget;
 class UInventoryComponent;
 class UInventorySlotToolTipWidget;
 class UInventorySlotWidget;
@@ -23,6 +26,7 @@ class UInventorySlotWidget;
 // Delegate Declarations
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryWidget_OnCloseButtonClicked);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryWidget_OnInventoryItemMoved, FInventoryMoveRequest, InventoryMoveRequest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryWidget_OnInventoryItemDropped, int32, SlotIndex);
 
 
 UCLASS()
@@ -38,6 +42,7 @@ public:
 	/* Delegates */
 	FInventoryWidget_OnCloseButtonClicked OnCloseButtonClicked;
 	FInventoryWidget_OnInventoryItemMoved OnInventoryItemMoved;
+	FInventoryWidget_OnInventoryItemDropped OnInventoryItemDropped;
 
 
 protected:
@@ -48,6 +53,7 @@ protected:
 private:
 
 	void BindToEvents();
+	void CreateInventoryBackdrop();
 	void CreateInventorySlotToolTipWidget();
 
 	UFUNCTION()
@@ -56,28 +62,33 @@ private:
 	UFUNCTION()
 	void OnInventorySlotMoved(FInventoryMoveRequest InventoryMoveRequest);
 
+	UFUNCTION()
+	void OnInventorySlotItemDropped(int32 SlotIndex);
+
 	/*
 	 * UI Widgets
 	 */
 	UPROPERTY(EditAnywhere, Category = "User Interfaces")
-	TSubclassOf<UUserWidget> InventorySlotUserWidget = nullptr;
+	TSubclassOf<UUserWidget> InventoryBackdropUserWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "User Interfaces")
-	TSubclassOf<UUserWidget> InventorySlotItemUserWidget = nullptr;
+	TSubclassOf<UUserWidget> InventorySlotUserWidget = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "User Interfaces")
 	TSubclassOf<UUserWidget> InventorySlotToolTipUserWidget = nullptr;
 
 	UPROPERTY()
+	UInventoryBackdropWidget* InventoryBackdrop = nullptr;
+
+	UPROPERTY()
 	UInventorySlotToolTipWidget* InventorySlotToolTipWidget = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
-	UImage* IMG_Background = nullptr;
+	UCanvasPanel* InventoryWidgetPanel = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	UButton* BTN_Close = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	UUniformGridPanel* InventoryGridPanel = nullptr;
-
 };

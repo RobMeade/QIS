@@ -107,7 +107,7 @@ void AQISPlayerController::OnPickUpItem(const FInputActionValue& Value)
 
 void AQISPlayerController::OnDropItem(const FInputActionValue& Value)
 {
-	// TODO:
+	// TODO: Drpo Equipped Item
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Drop Item"));
@@ -116,7 +116,7 @@ void AQISPlayerController::OnDropItem(const FInputActionValue& Value)
 
 void AQISPlayerController::OnUseItem(const FInputActionValue& Value)
 {
-	// TODO:
+	// TODO: Use Equipped Item
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(1, 3.f, FColor::Green, TEXT("Use Item"));
@@ -145,8 +145,6 @@ void AQISPlayerController::CreateUIWidgets()
 		{
 			InventoryWidget->AddToViewport();
 			ToggleWidgetVisibility(InventoryWidget);
-
-			InventoryWidget->OnInventoryItemMoved.AddDynamic(this, &AQISPlayerController::OnInventoryItemMoved);
 		}
 	}
 }
@@ -156,6 +154,8 @@ void AQISPlayerController::BindToUIEvents()
 	if (InventoryWidget)
 	{
 		InventoryWidget->OnCloseButtonClicked.AddDynamic(this, &AQISPlayerController::OnInventoryCloseButtonClicked);
+		InventoryWidget->OnInventoryItemMoved.AddDynamic(this, &AQISPlayerController::OnInventoryItemMoved);
+		InventoryWidget->OnInventoryItemDropped.AddDynamic(this, &AQISPlayerController::OnInventoryItemDropped);
 	}
 }
 
@@ -187,6 +187,15 @@ void AQISPlayerController::OnInventoryItemMoved(FInventoryMoveRequest InventoryM
 	{
 		// TODO: Not sure if this is the best place for this, should this live on the QISCharacter instead?
 		QISCharacter->GetInventory()->AttemptMoveItem(InventoryMoveRequest);
+	}
+}
+
+void AQISPlayerController::OnInventoryItemDropped(int32 SlotIndex)
+{
+	if (QISCharacter)
+	{
+		// TODO: Not sure if this is the best place for this, should this live on the QISCharacter instead?
+		QISCharacter->DropInventoryItem(SlotIndex);
 	}
 }
 
